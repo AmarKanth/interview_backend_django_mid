@@ -2,6 +2,10 @@ from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework.views import APIView
 
+from django.utils.dateparse import parse_date
+from django.utils.timezone import make_aware
+from datetime import datetime, time
+
 from interview.inventory.models import (
     Inventory,
     InventoryLanguage,
@@ -42,7 +46,18 @@ class InventoryListCreateView(APIView):
         return Response(serializer.data, status=200)
 
     def get_queryset(self):
-        return self.queryset.all()
+        queryset = self.queryset.all()
+        date_filter = self.request.query_params.get("created_after")
+        
+        if not date_filter:
+            return queryset
+
+        date = parse_date(date_filter)
+        if not date:
+            return queryset.none()
+
+        aware_datetime = make_aware(datetime.combine(date, time.min))
+        return queryset.filter(created_at__gt=aware_datetime)
 
 
 class InventoryRetrieveUpdateDestroyView(APIView):
