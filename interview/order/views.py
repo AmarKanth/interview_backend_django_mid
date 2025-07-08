@@ -28,6 +28,14 @@ class OrderListCreateView(generics.ListCreateAPIView):
         return queryset.filter(start_date__gte=start, embargo_date__lte=end)
 
 
+class OrdersByTagView(APIView):
+    def get(self, request, pk):
+        tag = get_object_or_404(OrderTag, id=pk)
+        orders = tag.orders.all()
+        serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class DeactivateOrderView(APIView):
     def patch(self, request: Request, pk: int, *args, **kwargs) -> Response:
         order = get_object_or_404(Order, id=pk)

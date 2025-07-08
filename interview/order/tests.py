@@ -2,9 +2,14 @@ from datetime import date, timedelta
 from rest_framework import status
 
 from interview.tests.api_request_factory import APIViewRequestFactory
-from interview.order.views import OrderListCreateView, DeactivateOrderView, OrderTagsView
+from interview.order.views import (
+    OrderListCreateView,
+    DeactivateOrderView,
+    OrderTagsView,
+    OrdersByTagView,
+)
 from interview.order.serializers import OrderSerializer, OrderTagSerializer
-from interview.order.models import Order
+from interview.order.models import Order, OrderTag
 
 
 class TestOrderListCreateView(APIViewRequestFactory):
@@ -39,6 +44,28 @@ class TestOrderListCreateView(APIViewRequestFactory):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
+class TestOrdersByTagView(APIViewRequestFactory):
+    view_name = OrdersByTagView
+
+    def test_orders_list_by_tag_id(self):
+        tag = OrderTag.objects.first()
+        orders = tag.orders.all()
+        path_params = {"pk": tag.id}
+
+        response = self.send_request_to_view(method="get", path_params=path_params)
+        serializer = OrderSerializer(orders, many=True)
+
+        self.assertEqual(response.data, serializer.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_orders_list_with_invalid_tag_id(self):
+        path_params = {"pk": 10000}
+        response = self.send_request_to_view(method="get", path_params=path_params)
+
+        self.assertEqual(response.data["detail"], "Not found.")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
 class TestDeactivateOrderView(APIViewRequestFactory):
     view_name = DeactivateOrderView
 
@@ -70,13 +97,13 @@ class TestOrderTagsView(APIViewRequestFactory):
 
         response = self.send_request_to_view(method="get", path_params=path_params)
         serializer = OrderTagSerializer(tags, many=True)
-        
+
         self.assertEqual(response.data, serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_tags_list_with_invalid_order_id(self):
         path_params = {"pk": 10000}
         response = self.send_request_to_view(method="get", path_params=path_params)
-        
+
         self.assertEqual(response.data["detail"], "Not found.")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
