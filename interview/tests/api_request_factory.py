@@ -36,7 +36,13 @@ class APIViewRequestFactory(TestCase):
         )
         inventory.tags.add(tag)
 
-        order = Order.objects.create(
+        Order.objects.create(
+            is_active=True,
+            inventory=inventory,
+            start_date=date.today(),
+            embargo_date=date.today() + timedelta(days=5),
+        )
+        Order.objects.create(
             is_active=True,
             inventory=inventory,
             start_date=date.today(),

@@ -4,14 +4,28 @@ from rest_framework.request import Request
 from rest_framework.views import APIView
 
 from django.shortcuts import render, get_object_or_404
+from django.utils.dateparse import parse_date
 
 from interview.order.models import Order, OrderTag
 from interview.order.serializers import OrderSerializer, OrderTagSerializer
 
 # Create your views here.
 class OrderListCreateView(generics.ListCreateAPIView):
-    queryset = Order.objects.all()
     serializer_class = OrderSerializer
+
+    def get_queryset(self):
+        queryset = Order.objects.all()
+
+        start = parse_date(self.request.query_params.get("start", ""))
+        end = parse_date(self.request.query_params.get("end", ""))
+
+        if not start and not end:
+            return queryset
+
+        if not start or not end:
+            return queryset.none()
+
+        return queryset.filter(start_date__gte=start, embargo_date__lte=end)
 
 
 class DeactivateOrderView(APIView):
