@@ -1,4 +1,6 @@
 from urllib.parse import urlencode
+from datetime import date, timedelta
+
 from django.test import TestCase
 from rest_framework.test import APIRequestFactory
 
@@ -8,6 +10,7 @@ from interview.inventory.models import (
     InventoryLanguage,
     InventoryTag,
 )
+from interview.order.models import Order
 
 
 class APIViewRequestFactory(TestCase):
@@ -32,6 +35,13 @@ class APIViewRequestFactory(TestCase):
             },
         )
         inventory.tags.add(tag)
+
+        order = Order.objects.create(
+            is_active=True,
+            inventory=inventory,
+            start_date=date.today(),
+            embargo_date=date.today() + timedelta(days=10),
+        )
 
     @classmethod
     def tearDownClass(cls):
