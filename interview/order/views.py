@@ -39,3 +39,11 @@ class DeactivateOrderView(APIView):
 class OrderTagListCreateView(generics.ListCreateAPIView):
     queryset = OrderTag.objects.all()
     serializer_class = OrderTagSerializer
+
+
+class OrderTagsView(APIView):
+    def get(self, request, pk):
+        order = get_object_or_404(Order, id=pk)
+        tags = order.tags.all()
+        serializer = OrderTagSerializer(tags, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

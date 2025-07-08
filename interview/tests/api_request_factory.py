@@ -10,7 +10,7 @@ from interview.inventory.models import (
     InventoryLanguage,
     InventoryTag,
 )
-from interview.order.models import Order
+from interview.order.models import Order, OrderTag
 
 
 class APIViewRequestFactory(TestCase):
@@ -36,18 +36,22 @@ class APIViewRequestFactory(TestCase):
         )
         inventory.tags.add(tag)
 
-        Order.objects.create(
+        order_tag = OrderTag.objects.create(is_active=True, name='San Antonio')
+        order1 = Order.objects.create(
             is_active=True,
             inventory=inventory,
             start_date=date.today(),
             embargo_date=date.today() + timedelta(days=5),
         )
-        Order.objects.create(
+        order1.tags.add(order_tag)
+
+        order2 = Order.objects.create(
             is_active=True,
             inventory=inventory,
             start_date=date.today(),
             embargo_date=date.today() + timedelta(days=10),
         )
+        order2.tags.add(order_tag)
 
     @classmethod
     def tearDownClass(cls):

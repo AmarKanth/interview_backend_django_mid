@@ -2,8 +2,8 @@ from datetime import date, timedelta
 from rest_framework import status
 
 from interview.tests.api_request_factory import APIViewRequestFactory
-from interview.order.views import OrderListCreateView, DeactivateOrderView
-from interview.order.serializers import OrderSerializer
+from interview.order.views import OrderListCreateView, DeactivateOrderView, OrderTagsView
+from interview.order.serializers import OrderSerializer, OrderTagSerializer
 from interview.order.models import Order
 
 
@@ -56,5 +56,27 @@ class TestDeactivateOrderView(APIViewRequestFactory):
         path_params = {"pk": 10000}
         response = self.send_request_to_view(method="patch", path_params=path_params)
 
+        self.assertEqual(response.data["detail"], "Not found.")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class TestOrderTagsView(APIViewRequestFactory):
+    view_name = OrderTagsView
+
+    def test_tags_list_by_order_id(self):
+        order = Order.objects.first()
+        tags = order.tags.all()
+        path_params = {"pk": order.id}
+
+        response = self.send_request_to_view(method="get", path_params=path_params)
+        serializer = OrderTagSerializer(tags, many=True)
+        
+        self.assertEqual(response.data, serializer.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_tags_list_with_invalid_order_id(self):
+        path_params = {"pk": 10000}
+        response = self.send_request_to_view(method="get", path_params=path_params)
+        
         self.assertEqual(response.data["detail"], "Not found.")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
