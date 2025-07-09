@@ -1,0 +1,1 @@
+### Challenge 8: Create Inventory Item — Explanation
