@@ -35,7 +35,7 @@ In addition to basic fields, each inventory item will include a **metadata objec
 4. **Create the Api**
    - Create an endpoint using Django REST Framework’s `APIView` class.
    - Use the `POST` HTTP method to receive and save the inventory data.
-   - Return `HTTP_200_OK` on successful creation.
+   - Return `HTTP_201_CREATED` on successful creation.
    - If validation fails, return `HTTP_400_BAD_REQUEST` with serializer error details.
 
 5. **Update `urls.py` File**
